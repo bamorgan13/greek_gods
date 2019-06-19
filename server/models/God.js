@@ -140,6 +140,12 @@ GodSchema.statics.removeEmblem = (godId, emblemId) => {
 	});
 };
 
+GodSchema.statics.findEmblems = function(godId) {
+	return this.findById(godId)
+		.populate('emblems')
+		.then(god => god.emblems);
+};
+
 GodSchema.statics.updateAbode = (godId, abodeId) => {
 	const God = mongoose.model('god');
 	const Abode = mongoose.model('abode');
@@ -162,6 +168,30 @@ GodSchema.statics.updateAbode = (godId, abodeId) => {
 				return Promise.all([god.save(), newAbode.save()]).then(([god, newAbode]) => god);
 			}
 		});
+	});
+};
+
+GodSchema.statics.addDomain = (godId, domain) => {
+	const God = mongoose.model('god');
+
+	return God.findById(godId).then(god => {
+		god.domains.push(domain);
+
+		god.save().then(god => god);
+	});
+};
+
+GodSchema.statics.removeDomain = (godId, domain) => {
+	const God = mongoose.model('god');
+
+	return God.findById(godId).then(god => {
+		god.domains.forEach((godDomain, i) => {
+			if (godDomain === domain) {
+				god.domains.splice(i, 1);
+			}
+		});
+
+		god.save().then(god => god);
 	});
 };
 

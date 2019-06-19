@@ -2,7 +2,11 @@ const graphql = require('graphql');
 const { GraphQLID, GraphQLObjectType, GraphQLString, GraphQLInt } = graphql;
 const mongoose = require('mongoose');
 const God = mongoose.model('god');
+const Emblem = mongoose.model('emblem');
+const Abode = mongoose.model('abode');
 const GodType = require('./god_type');
+const AbodeType = require('./abode_type');
+const EmblemType = require('./emblem_type');
 
 // this will be the where we will create all of the mutations for our application
 const mutation = new GraphQLObjectType({
@@ -24,6 +28,13 @@ const mutation = new GraphQLObjectType({
 			// here we are just destructing our arguments
 			resolve(parentValue, { name, type, description }) {
 				return new God({ name, type, description }).save();
+			}
+		},
+		deleteGod: {
+			type: GodType,
+			args: { id: { type: GraphQLID } },
+			resolve(parentValue, { id }) {
+				return God.remove({ _id: id });
 			}
 		},
 		updateGod: {
@@ -97,6 +108,83 @@ const mutation = new GraphQLObjectType({
 			},
 			resolve(parentValue, { godId, abodeId }) {
 				return God.updateAbode(godId, abodeId);
+			}
+		},
+		addGodDomain: {
+			type: GodType,
+			args: {
+				godId: { type: GraphQLID },
+				domain: { type: GraphQLString }
+			},
+			resolve(parentValue, { godId, domain }) {
+				return God.addDomain(godId, domain);
+			}
+		},
+		removeGodDomain: {
+			type: GodType,
+			args: {
+				godId: { type: GraphQLID },
+				domain: { type: GraphQLString }
+			},
+			resolve(parentValue, { godId, domain }) {
+				return God.removeDomain(godId, domain);
+			}
+		},
+		newAbode: {
+			type: AbodeType,
+			args: {
+				name: { type: GraphQLString },
+				coordinates: { type: GraphQLString }
+			},
+			resolve(parentValue, { name, coordinates }) {
+				return new Abode({ name, coordinates }).save();
+			}
+		},
+		deleteAbode: {
+			type: AbodeType,
+			args: { id: { type: GraphQLID } },
+			resolve(parentValue, { id }) {
+				return Abode.remove({ _id: id });
+			}
+		},
+		updateAbode: {
+			type: AbodeType,
+			args: {
+				id: { type: GraphQLID },
+				name: { type: GraphQLString }
+			},
+			resolve(parentValue, { id, name }) {
+				return Abode.findOneAndUpdate({ _id: id }, { $set: { name } }, { new: true }, (err, abode) => {
+					return abode;
+				});
+			}
+		},
+		newEmblem: {
+			type: EmblemType,
+			args: {
+				name: { type: GraphQLString }
+			},
+			resolve(parentValue, { name }) {
+				return new Emblem({ name }).save();
+			}
+		},
+		deleteEmblem: {
+			type: EmblemType,
+			args: { id: { type: GraphQLID } },
+			resolve(parentValue, { id }) {
+				return Emblem.remove({ _id: id });
+			}
+		},
+		updateEmblem: {
+			type: EmblemType,
+			args: {
+				id: { type: GraphQLID },
+				name: { type: GraphQLString }
+			},
+			resolve(parentValue, { id, name }) {
+				return Emblem.findOneAndUpdate({ _id: id }, { $set: { name } }, { new: true }, (err, emblem) => {
+					return emblem;
+				});
 			}
 		}
 	}
